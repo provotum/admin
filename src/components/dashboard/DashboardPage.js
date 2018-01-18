@@ -1,14 +1,23 @@
 import React from 'react';
+import SocketLog from "../socket-log/SocketLog";
+
+
 class DashboardPage extends React.Component {
 
-  render() {
-    return (
-      <div>
-        <h1>About</h1>
-        <p>Something</p>
-      </div>
-    );
-  }
+    constructor(props) {
+        super(props);
+    }
+
+    componentWillMount() {
+    }
+
+    render() {
+        return (
+            <div>
+                <SocketLog/>
+            </div>
+        );
+    }
 }
 
 export default DashboardPage;
