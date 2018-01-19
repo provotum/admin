@@ -1,5 +1,5 @@
 import React from 'react';
-import SocketLog from "../socket-log/SocketLog";
+import ContractDeployment from "../deplyoment/ContractDeployment";
 
 
 class DashboardPage extends React.Component {
@@ -14,7 +14,7 @@ class DashboardPage extends React.Component {
     render() {
         return (
             <div>
-                <SocketLog/>
+                <ContractDeployment/>
             </div>
         );
     }

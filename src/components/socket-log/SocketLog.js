@@ -24,16 +24,20 @@ class SocketLog extends React.Component {
     }
 
     successCallback(msg) {
-        this.stompClient.subscribe('/contracts/ballot/subscription/deployment', msg => {
+       this.stompClient.subscribe('/contracts/ballot/subscription/deployment', (msg) => this.onReceivedSubscription(msg));
+    }
+
+
+
+    onReceivedSubscription(msg) {
             // will cause this component to re-render
             this.setState((previousState, props) => {
-                previousState.events.push(msg);
+                previousState.deploymentEvents.push(msg);
 
                 return {
-                    events: previousState.events
+                    events: previousState.deploymentEvents
                 };
             });
-        });
     }
 
     errorCallback(msg) {
@@ -63,7 +67,7 @@ class SocketLog extends React.Component {
             <div>
                 <button onClick={() => this.sendBallotDeployment()}>Click Me</button>
                 <ul>
-                    {this.state.events.map(event =>
+                    {this.state.deploymentEvents.map(event =>
                         <li>{event.address}: {event.error.message}</li>
                     )}
                 </ul>

@@ -17,7 +17,7 @@
     "babel-polyfill": "6.8.0",
     "bootstrap": "3.3.6",
     "jquery": "2.2.3",
-    "provotum-stomp-client": "0.0.3",
+    "provotum-stomp-client": "0.0.4",
     "react": "15.0.2",
     "react-dom": "15.0.2",
     "react-logger": "^1.1.0",
