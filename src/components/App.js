@@ -1,19 +1,12 @@
-import React, {PropTypes} from 'react';
-import Header from './common/Header';
+import React from 'react';
+import DashboardPage from "./dashboard/DashboardPage";
 
-class App extends React.Component{
-  render(){
-    return(
-      <div className="container-fluid">
-        <Header/>
-        {this.props.children}
-      </div>
-    );
-  }
+class App extends React.Component {
+    render() {
+        return (
+            <DashboardPage/>
+        );
+    }
 }
-
-App.propTypes = {
-  children: PropTypes.object.isRequired
-};
 
 export default App;
