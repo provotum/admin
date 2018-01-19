@@ -1,6 +1,8 @@
 import React from 'react';
 import StompClient from "provotum-stomp-client";
 import logger from "react-logger";
+import {Button, Timeline} from 'antd';
+import {Col, Row} from 'antd';
 
 class ContractDeployment extends React.Component {
 
@@ -42,7 +44,7 @@ class ContractDeployment extends React.Component {
     onReceivedDeployment(msg) {
         // will cause this component to re-render
         this.setState((previousState, props) => {
-            previousState.deploymentEvents.push(msg);
+            previousState.deploymentEvents.unshift(msg);
 
             if (msg.hasOwnProperty('status') && msg.status === 'success' &&
                 msg.hasOwnProperty('contract') && msg.contract.type === 'zero-knowledge') {
@@ -88,19 +90,24 @@ class ContractDeployment extends React.Component {
     render() {
         return (
             <div>
-                <h1>Deployment</h1>
-                <button onClick={() => this.requestZeroKnowledgeDeployment()}>Click Me</button>
-                <ul>
-                    {this.state.deploymentEvents.map(event =>
-                        <li key={event.id}>
-                            <p>{event.status}: {event.message}</p>
-
-                            {event.contract.address &&
-                            <p>{event.contract.type} {'=>'} {event.contract.address}</p>
-                            }
-                        </li>
-                    )}
-                </ul>
+                <Row>
+                    <h1>Deployment</h1>
+                </Row>
+                <Row>
+                    <Button onClick={() => this.requestZeroKnowledgeDeployment()}>Deploy</Button>
+                </Row>
+                <Row>
+                    <Timeline pending="Listening for events...">
+                        {this.state.deploymentEvents.map(event =>
+                            <Timeline.Item key={event.id}>
+                                {event.status}: {event.message}
+                                {event.contract.address &&
+                                <p>{event.contract.type} {'=>'} {event.contract.address}</p>
+                                }
+                            </Timeline.Item>
+                        )}
+                    </Timeline>
+                </Row>
             </div>
         );
     }
