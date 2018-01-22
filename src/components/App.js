@@ -1,10 +1,10 @@
 import React from 'react';
-import DashboardPage from "./dashboard/DashboardPage";
+import Page from "./page/Page";
 
 class App extends React.Component {
     render() {
         return (
-            <DashboardPage/>
+            <Page/>
         );
     }
 }

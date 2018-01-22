@@ -1,7 +1,7 @@
 import React from 'react';
 import StompClient from "provotum-stomp-client";
 import logger from "react-logger";
-import {Button, Timeline, Row, Divider, Icon, Badge} from 'antd';
+import {Badge, Button, Card, Divider, Icon, Row, Timeline} from 'antd';
 
 class ContractDeployment extends React.Component {
 
@@ -89,25 +89,27 @@ class ContractDeployment extends React.Component {
 
   render() {
     return (
-      <div>
-        <Row gutter={32}>
-          <Button onClick={() => this.requestZeroKnowledgeDeployment()}>Deploy</Button>
-        </Row>
-        <Divider />
-        <Row gutter={32}>
-          <Timeline>
-            {this.state.deploymentEvents.map(event =>
-              <Timeline.Item key={event.id} dot={<Icon type="check" />}>
-                {event.status}: {event.message}  <Badge count={event.message} style={{ backgroundColor: '#52c41a' }} />
+      <Card title="Deployment Updates" extra={<a href="#">Clear</a>} style={{width: 300}}>
+        <div>
+          <Row gutter={32}>
+            <Button onClick={() => this.requestZeroKnowledgeDeployment()}>Deploy</Button>
+          </Row>
+          <Divider/>
+          <Row gutter={32}>
+            <Timeline>
+              {this.state.deploymentEvents.map(event =>
+                <Timeline.Item key={event.id} dot={<Icon type="check"/>}>
+                  {event.status}: {event.message} <Badge count={event.message} style={{backgroundColor: '#52c41a'}}/>
 
-                {event.contract.address &&
-                <p>{event.contract.type} {'=>'} {event.contract.address}</p>
-                }
-              </Timeline.Item>
+                  {event.contract.address &&
+                  <p>{event.contract.type} {'=>'} {event.contract.address}</p>
+                  }
+                </Timeline.Item>
               )}
-          </Timeline>
-        </Row>
-      </div>
+            </Timeline>
+          </Row>
+        </div>
+      </Card>
     );
   }
 
