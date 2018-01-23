@@ -21,7 +21,7 @@ class DashboardPage extends React.Component {
           <Breadcrumb.Item>{this.props.location.pathname}</Breadcrumb.Item>
         </Breadcrumb>
         <Row gutter={24}>
-          <Col {}>
+          <Col {...topColResponsiveProps}>
             <StatusCard/>
           </Col>
           <Col {...topColResponsiveProps}>
