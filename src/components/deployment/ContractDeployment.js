@@ -89,18 +89,17 @@ class ContractDeployment extends React.Component {
 
   render() {
     return (
-      <Card title="Deployment Updates" extra={<a href="#">Clear</a>} style={{width: 300}}>
+      <Card title="Event Log">
         <div>
-          <Row gutter={32}>
+          <Row>
             <Button onClick={() => this.requestZeroKnowledgeDeployment()}>Deploy</Button>
           </Row>
           <Divider/>
-          <Row gutter={32}>
+          <Row>
             <Timeline>
               {this.state.deploymentEvents.map(event =>
                 <Timeline.Item key={event.id} dot={<Icon type="check"/>}>
                   {event.status}: {event.message} <Badge count={event.message} style={{backgroundColor: '#52c41a'}}/>
-
                   {event.contract.address &&
                   <p>{event.contract.type} {'=>'} {event.contract.address}</p>
                   }
