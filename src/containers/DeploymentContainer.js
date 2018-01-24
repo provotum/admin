@@ -5,6 +5,7 @@ import EventLogCard from '../components/cards/EventLogCard';
 import DeployBtnCard from '../components/cards/DeployBtnCard';
 import StatusCard from '../components/cards/StatusCard';
 import {reactLocalStorage} from 'reactjs-localstorage';
+import {Row, Col} from 'antd';
 
 const zkContractAddressKey = 'zk-contract-address-key';
 const ballotContractAddressKey = 'ballot-contract-address-key';
@@ -135,11 +136,18 @@ class DeploymentContainer extends React.Component {
 
   render() {
     return (
-      <div>
-        <EventLogCard lastOccurredEvent={this.state.lastOccurredEvent}/>
-        <DeployBtnCard actions={{onClickHandler: this.deployBtnClickHandler}}/>
-        <StatusCard isConnected={this.state.isConnected} zkContractAddress={this.state.zeroKnowledgeContractAddress} ballotContractAddress={this.state.ballotContractAddress} />
-      </div>
+      <Row gutter={24}>
+        <Col {...topColResponsiveProps}>
+          <StatusCard isConnected={this.state.isConnected} zkContractAddress={this.state.zeroKnowledgeContractAddress}
+                      ballotContractAddress={this.state.ballotContractAddress}/>
+        </Col>
+        <Col {...topColResponsiveProps}>
+          <DeployBtnCard actions={{onClickHandler: this.deployBtnClickHandler}}/>
+        </Col>
+        <Col {...topColResponsiveProps}>
+          <EventLogCard lastOccurredEvent={this.state.lastOccurredEvent}/>
+        </Col>
+      </Row>
     );
   }
 
@@ -147,3 +155,12 @@ class DeploymentContainer extends React.Component {
 
 DeploymentContainer.propTypes = {};
 export default DeploymentContainer;
+
+const topColResponsiveProps = {
+  xs: 24,
+  sm: 12,
+  md: 12,
+  lg: 12,
+  xl: 6,
+  style: {marginBottom: 24},
+};

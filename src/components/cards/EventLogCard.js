@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge, Card, Icon, Timeline} from "antd";
+import {Badge, List, Card, Icon, Timeline} from "antd";
 import PropTypes from "prop-types";
 import ClearBtn from "./ClearBtn";
 import logger from "react-logger";
@@ -15,6 +15,7 @@ export default class EventLogCard extends React.Component {
     }
 
     this.state = {
+      loading: true,
       lastOccurredEvent: props.lastOccurredEvent,
       lastOccurredEvents: events
     };
@@ -40,28 +41,29 @@ export default class EventLogCard extends React.Component {
       lastOccurredEvents: []
     });
 
-    logger.log("cleard");
+    logger.log("cleared");
   }
 
   render() {
     return (
-      <div>
-        <Card title="Event Log" extra={<ClearBtn actions={{onClickHandler: this.handleClear}}/>}>
-          <Timeline>
-            {this.state.lastOccurredEvents.map(event =>
-              <Timeline.Item key={event.id} dot={<Icon type="check"/>}>
-                {event.status}: {event.message} <Badge count={event.message} style={{backgroundColor: '#52c41a'}}/>
-                {event.contract.address &&
-                <p>{event.contract.type} {'=>'} {event.contract.address}</p>
-                }
-              </Timeline.Item>
-            )}
-          </Timeline>
-        </Card>
-      </div>
+      <Card title="Event Log" extra={<ClearBtn actions={{onClickHandler: this.handleClear}}/>}>
+            <List style={divStyle} size="small" renderItem={this.state.lastOccurredEvents}>
+              {this.state.lastOccurredEvents.map(event =>
+                <List.Item key={event.id}>
+                  {event.status}: {event.message} {event.contract.address &&
+                event.contract.type} {'=>'} {event.contract.address}
+                </List.Item>
+              )}
+            </List>
+      </Card>
     );
   }
 }
+
+const divStyle = {
+  height: '300px',
+  overflow: 'auto'
+};
 
 EventLogCard.propTypes = {
   lastOccurredEvent: PropTypes.object,
