@@ -65,8 +65,10 @@ export default class EventLogCard extends React.Component {
                 })()}
                 title={event.message}
                 description={(() => {
-                  if (null !== event.contract.address) {
+                  if (event.hasOwnProperty('contract') && null !== event.contract.address) {
                     return event.contract.type + ': ' + event.contract.address;
+                  } else if (event.hasOwnProperty('transaction')) {
+                    return 'Transaction: ' + event.transaction;
                   }
                 })()}>
               </List.Item.Meta>

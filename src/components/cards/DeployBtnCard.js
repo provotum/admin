@@ -48,7 +48,7 @@ class DeployBtnCard extends React.Component {
           </Row>
           <Row>
             <Col span={24} style={{textAlign: 'right'}}>
-              <Button type="primary" htmlType="submit">Search</Button>
+              <Button type="primary" htmlType="submit">Deploy</Button>
             </Col>
           </Row>
         </Form>
