@@ -21,6 +21,7 @@
     "react-dom": "16.2.0",
     "react-logger": "^1.1.0",
     "react-router-dom": "^4.2.2",
+    "reactjs-localstorage": "0.0.6",
     "sockjs-client": "^1.1.4"
   },
   "devDependencies": {

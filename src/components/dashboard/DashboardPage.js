@@ -1,7 +1,5 @@
 import React from 'react';
-import ContractDeployment from "../deployment/ContractDeployment";
-import StatusCard from "../statuscard/StatusCard";
-import ControlPanelCard from "../controlpanelcard/ControlPanelCard";
+import DeploymentContainer from "../../containers/DeploymentContainer";
 import {Breadcrumb, Row, Col} from 'antd';
 import PropTypes from "prop-types";
 
@@ -21,17 +19,7 @@ class DashboardPage extends React.Component {
           <Breadcrumb.Item>{this.props.location.pathname}</Breadcrumb.Item>
         </Breadcrumb>
         <Row gutter={24}>
-          <Col {...topColResponsiveProps}>
-            <StatusCard/>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ControlPanelCard/>
-          </Col>
-          <Col {...topColResponsiveProps}>
-            <ContractDeployment/>
-          </Col>
-          <Col {...topColResponsiveProps}>
-          </Col>
+          <DeploymentContainer/>
         </Row>
       </div>
     );
