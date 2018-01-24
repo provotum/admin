@@ -20,7 +20,7 @@ class ClearBtn extends React.Component {
 
   render() {
     return (
-      <Button type="danger" onClick={this.onClick}>Danger</Button>
+      <Button type="danger" onClick={this.onClick}>Clear</Button>
     );
   }
 }

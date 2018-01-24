@@ -27,21 +27,21 @@ class DeployBtnCard extends React.Component {
           <Row>
             <FormItem label={'Question'}>
               {getFieldDecorator('question', {
-                rules: [{ required: true, message: 'Please input your username!' }],
+                rules: [{ required: true, message: 'Please enter a valid question!' }],
               })(
-                <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Question?"/>
+                <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Voting question"/>
               )}
             </FormItem>
             <FormItem label={'P'}>
               {getFieldDecorator('p', {
-                rules: [{ required: true, message: 'Please input your username!' }],
+                rules: [{ required: true, message: 'Please input p'}],
               })(
                 <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} type={'number'} placeholder="p?" />
               )}
             </FormItem>
             <FormItem label={'G'}>
               {getFieldDecorator('g', {
-                rules: [{ required: true, message: 'Please input your username!' }],
+                rules: [{ required: true, message: 'Please input g' }],
               })(
                 <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} type={'number'} placeholder="g?" />
               )}
