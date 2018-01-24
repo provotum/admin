@@ -136,18 +136,25 @@ class DeploymentContainer extends React.Component {
 
   render() {
     return (
-      <Row gutter={24}>
-        <Col {...topColResponsiveProps}>
-          <StatusCard isConnected={this.state.isConnected} zkContractAddress={this.state.zeroKnowledgeContractAddress}
-                      ballotContractAddress={this.state.ballotContractAddress}/>
-        </Col>
-        <Col {...topColResponsiveProps}>
-          <DeployBtnCard actions={{onClickHandler: this.deployBtnClickHandler}}/>
-        </Col>
-        <Col {...topColResponsiveProps}>
-          <EventLogCard lastOccurredEvent={this.state.lastOccurredEvent}/>
-        </Col>
-      </Row>
+      <div>
+        <Row gutter={24}>
+          <Col xs={24} style={{marginBottom: 24}}>
+            <StatusCard
+              isConnected={this.state.isConnected}
+              zkContractAddress={this.state.zeroKnowledgeContractAddress}
+              ballotContractAddress={this.state.ballotContractAddress}
+            />
+          </Col>
+        </Row>
+        <Row gutter={24}>
+          <Col {...smallColResponsiveProps}>
+            <DeployBtnCard actions={{onClickHandler: this.deployBtnClickHandler}}/>
+          </Col>
+          <Col {...wideColResponsiveProps}>
+            <EventLogCard lastOccurredEvent={this.state.lastOccurredEvent}/>
+          </Col>
+        </Row>
+      </div>
     );
   }
 
@@ -156,11 +163,20 @@ class DeploymentContainer extends React.Component {
 DeploymentContainer.propTypes = {};
 export default DeploymentContainer;
 
-const topColResponsiveProps = {
+const smallColResponsiveProps = {
   xs: 24,
   sm: 12,
   md: 12,
   lg: 12,
   xl: 6,
-  style: {marginBottom: 24},
+  style: {marginBottom: 24}
+};
+
+const wideColResponsiveProps = {
+  xs: 24,
+  sm: 24,
+  md: 24,
+  lg: 24,
+  xl: 12,
+  style: {marginBottom: 24}
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge, List, Card, Icon, Timeline} from "antd";
+import {Badge, List, Card, Icon, Avatar} from "antd";
 import PropTypes from "prop-types";
 import ClearBtn from "./ClearBtn";
 import logger from "react-logger";
@@ -15,9 +15,9 @@ export default class EventLogCard extends React.Component {
     }
 
     this.state = {
-      loading: true,
       lastOccurredEvent: props.lastOccurredEvent,
-      lastOccurredEvents: events
+      lastOccurredEvents: events,
+      receivedEventsId: {}
     };
 
     this.handleClear = this.handleClear.bind(this);
@@ -25,9 +25,15 @@ export default class EventLogCard extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     let events = this.state.lastOccurredEvents;
+    let receivedEventsId = this.state.receivedEventsId;
 
-    if (null !== nextProps.lastOccurredEvent) {
-      events.push(nextProps.lastOccurredEvent);
+    // check that we do not have a duplicated event
+    if (null !== nextProps.lastOccurredEvent && !this.state.receivedEventsId.hasOwnProperty(nextProps.lastOccurredEvent.id)) {
+      // now merge the last occurred event with the existing events
+      events = [nextProps.lastOccurredEvent].concat(events);
+      // add the id of the event to the seen event id map so that we can ignore it in the future.
+      // note, that the value is arbitrary.
+      receivedEventsId[nextProps.lastOccurredEvent.id] = true;
     }
 
     this.setState({
@@ -40,21 +46,33 @@ export default class EventLogCard extends React.Component {
     this.setState({
       lastOccurredEvents: []
     });
-
-    logger.log("cleared");
   }
 
   render() {
     return (
       <Card title="Event Log" extra={<ClearBtn actions={{onClickHandler: this.handleClear}}/>}>
-            <List style={divStyle} size="small" renderItem={this.state.lastOccurredEvents}>
-              {this.state.lastOccurredEvents.map(event =>
-                <List.Item key={event.id}>
-                  {event.status}: {event.message} {event.contract.address &&
-                event.contract.type} {'=>'} {event.contract.address}
-                </List.Item>
-              )}
-            </List>
+        <List style={divStyle} size="small" renderItem={this.state.lastOccurredEvents}>
+          {this.state.lastOccurredEvents.map(event =>
+            <List.Item key={event.id}>
+              <List.Item.Meta
+                avatar={(() => {
+                  switch (event.status) {
+                    case "success":
+                      return <Avatar icon="check-circle-o" style={{color: '#52c41a'}}/>;
+                    case "error":
+                      return <Avatar icon="close-circle-o" style={{color: '#f5222d'}}/>;
+                  }
+                })()}
+                title={event.message}
+                description={(() => {
+                  if (null !== event.contract.address) {
+                    return event.contract.type + ': ' + event.contract.address;
+                  }
+                })()}>
+              </List.Item.Meta>
+            </List.Item>
+          )}
+        </List>
       </Card>
     );
   }
