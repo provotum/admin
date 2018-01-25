@@ -4,8 +4,9 @@ import logger from "react-logger";
 import EventLogCard from '../components/cards/EventLogCard';
 import DeployBtnCard from '../components/cards/DeployBtnCard';
 import StatusCard from '../components/cards/StatusCard';
+import VoteBtnCard from '../components/cards/VoteBtnCard';
 import {reactLocalStorage} from 'reactjs-localstorage';
-import {Row, Col} from 'antd';
+import {Col, Row} from 'antd';
 
 const zkContractAddressKey = 'zk-contract-address-key';
 const ballotContractAddressKey = 'ballot-contract-address-key';
@@ -20,15 +21,26 @@ class DeploymentContainer extends React.Component {
       isConnected: false,
       zeroKnowledgeContractAddress: '',
       ballotContractAddress: '',
-      deploymentContext: null
+      deploymentContext: null,
+      votingOpenedTrxHash: null,
+      votingClosedTrxHash: null,
+      supportingVoteCount: null,
+      opposingVoteCount: null
     };
 
     this.deploymentSubscription = null;
+    this.votingStatusSubscription = null;
 
     this.deployBtnClickHandler = this.deployBtnClickHandler.bind(this);
+    this.openVoteBtnClickHandler = this.openVoteBtnClickHandler.bind(this);
+    this.closeVoteBtnClickHandler = this.closeVoteBtnClickHandler.bind(this);
+
     this.onReceivedDeployment = this.onReceivedDeployment.bind(this);
+    this.onReceiveVotingStatus = this.onReceiveVotingStatus.bind(this);
     this.requestBallotDeployment = this.requestBallotDeployment.bind(this);
     this.requestZeroKnowledgeDeployment = this.requestZeroKnowledgeDeployment.bind(this);
+    this.requestOpenVote = this.requestOpenVote.bind(this);
+    this.requestCloseVote = this.requestCloseVote.bind(this);
   }
 
   componentDidMount() {
@@ -48,10 +60,16 @@ class DeploymentContainer extends React.Component {
     if (null !== this.deploymentSubscription) {
       this.deploymentSubscription.unsubscribe();
     }
+
+    if (null !== this.votingStatusSubscription) {
+      this.votingStatusSubscription.unsubscribe();
+    }
   }
 
   successCallback(msg) {
     this.deploymentSubscription = this.stompClient.subscribe('/topic/deployments', (msg) => this.onReceivedDeployment(msg));
+    this.votingStatusSubscription = this.stompClient.subscribe('/topic/voting-status', (msg) => this.onReceiveVotingStatus(msg));
+
     this.setState({
       isConnected: true
     });
@@ -76,6 +94,42 @@ class DeploymentContainer extends React.Component {
     // The ballot will be deployed automatically once we got the address of the ZK contract.
     // See onReceivedDeployment()
   }
+
+  openVoteBtnClickHandler() {
+    this.requestOpenVote();
+  }
+
+  requestOpenVote() {
+    this.stompClient.send(
+      '/websocket/contracts/ballot/open-vote',
+      {
+        'contract-address': this.state.zeroKnowledgeContractAddress
+      }
+    );
+  }
+
+  closeVoteBtnClickHandler() {
+    this.requestCloseVote();
+  }
+
+  requestCloseVote() {
+    this.stompClient.send(
+      '/websocket/contracts/ballot/close-vote',
+      {
+        'contract-address': this.state.zeroKnowledgeContractAddress
+      }
+    );
+  }
+
+  onReceiveVotingStatus(msg) {
+    // TODO: check message and set state appropriately for statuscard.
+
+    // will cause this component to re-render
+    this.setState({
+      lastOccurredEvent: msg
+    });
+  }
+
 
   onReceivedDeployment(msg) {
     // will cause this component to re-render
@@ -136,18 +190,37 @@ class DeploymentContainer extends React.Component {
 
   render() {
     return (
-      <Row gutter={24}>
-        <Col {...topColResponsiveProps}>
-          <StatusCard isConnected={this.state.isConnected} zkContractAddress={this.state.zeroKnowledgeContractAddress}
-                      ballotContractAddress={this.state.ballotContractAddress}/>
-        </Col>
-        <Col {...topColResponsiveProps}>
-          <DeployBtnCard actions={{onClickHandler: this.deployBtnClickHandler}}/>
-        </Col>
-        <Col {...topColResponsiveProps}>
-          <EventLogCard lastOccurredEvent={this.state.lastOccurredEvent}/>
-        </Col>
-      </Row>
+      <div>
+        <Row gutter={24}>
+          <Col xs={24} style={{marginBottom: 24}}>
+            <StatusCard
+              isConnected={this.state.isConnected}
+              zkContractAddress={this.state.zeroKnowledgeContractAddress}
+              ballotContractAddress={this.state.ballotContractAddress}
+              votingOpenedTrxHash={this.state.votingOpenedTrxHash}
+              votingClosedTrxHash={this.state.votingClosedTrxHash}
+              opposingVoteCount={this.state.opposingVoteCount}
+              supportingVoteCount={this.state.supportingVoteCount}
+            />
+          </Col>
+        </Row>
+        <Row gutter={24}>
+          <Col {...smallColResponsiveProps}>
+            <DeployBtnCard actions={{onClickHandler: this.deployBtnClickHandler}}/>
+          </Col>
+          <Col {...smallColResponsiveProps}>
+            <VoteBtnCard
+              isDeployed={(this.state.isConnected && Boolean(this.state.zeroKnowledgeContractAddress) && Boolean(this.state.ballotContractAddress))}
+              actions={{
+              onOpenVoteHandler: this.openVoteBtnClickHandler,
+              onCloseVoteHandler: this.closeVoteBtnClickHandler
+            }}/>
+          </Col>
+          <Col {...wideColResponsiveProps}>
+            <EventLogCard lastOccurredEvent={this.state.lastOccurredEvent}/>
+          </Col>
+        </Row>
+      </div>
     );
   }
 
@@ -156,11 +229,20 @@ class DeploymentContainer extends React.Component {
 DeploymentContainer.propTypes = {};
 export default DeploymentContainer;
 
-const topColResponsiveProps = {
+const smallColResponsiveProps = {
   xs: 24,
   sm: 12,
   md: 12,
   lg: 12,
   xl: 6,
-  style: {marginBottom: 24},
+  style: {marginBottom: 24}
+};
+
+const wideColResponsiveProps = {
+  xs: 24,
+  sm: 24,
+  md: 24,
+  lg: 24,
+  xl: 12,
+  style: {marginBottom: 24}
 };
