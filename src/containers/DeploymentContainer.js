@@ -10,6 +10,7 @@ import {Col, Row} from 'antd';
 
 const zkContractAddressKey = 'zk-contract-address-key';
 const ballotContractAddressKey = 'ballot-contract-address-key';
+const votingOpenedTrxHashKey = 'voting-opened-trx-key';
 
 class DeploymentContainer extends React.Component {
 
@@ -124,12 +125,25 @@ class DeploymentContainer extends React.Component {
   onReceiveVotingStatus(msg) {
     // TODO: check message and set state appropriately for statuscard.
 
-    // will cause this component to re-render
-    this.setState({
-      lastOccurredEvent: msg
+    // save to localStorage as well with key: votingOpenedTrxHashKey
+    this.setState((previousState, props) => {
+
+      if (msg.hasOwnProperty('status') && msg.status === 'success') {
+        if (msg.hasOwnProperty('transaction')){
+          // now save that thing also in localStorage
+          reactLocalStorage.set(votingOpenedTrxHashKey, msg.transaction);
+          // also update the state
+          previousState.votingOpenedTrxHash = msg.transaction;
+        }
+      }
+
+      // will cause this component to re-render
+      return {
+        lastOccurredEvent: msg,
+        votingOpenedTrxHash: msg.transaction,
+      };
     });
   }
-
 
   onReceivedDeployment(msg) {
     // will cause this component to re-render
@@ -212,9 +226,9 @@ class DeploymentContainer extends React.Component {
             <VoteBtnCard
               isDeployed={(this.state.isConnected && Boolean(this.state.zeroKnowledgeContractAddress) && Boolean(this.state.ballotContractAddress))}
               actions={{
-              onOpenVoteHandler: this.openVoteBtnClickHandler,
-              onCloseVoteHandler: this.closeVoteBtnClickHandler
-            }}/>
+                onOpenVoteHandler: this.openVoteBtnClickHandler,
+                onCloseVoteHandler: this.closeVoteBtnClickHandler
+              }}/>
           </Col>
           <Col {...wideColResponsiveProps}>
             <EventLogCard lastOccurredEvent={this.state.lastOccurredEvent}/>
@@ -226,23 +240,28 @@ class DeploymentContainer extends React.Component {
 
 }
 
-DeploymentContainer.propTypes = {};
-export default DeploymentContainer;
+DeploymentContainer
+  .propTypes = {};
+export
+default
+DeploymentContainer;
 
-const smallColResponsiveProps = {
-  xs: 24,
-  sm: 12,
-  md: 12,
-  lg: 12,
-  xl: 6,
-  style: {marginBottom: 24}
-};
+const
+  smallColResponsiveProps = {
+    xs: 24,
+    sm: 12,
+    md: 12,
+    lg: 12,
+    xl: 6,
+    style: {marginBottom: 24}
+  };
 
-const wideColResponsiveProps = {
-  xs: 24,
-  sm: 24,
-  md: 24,
-  lg: 24,
-  xl: 12,
-  style: {marginBottom: 24}
-};
+const
+  wideColResponsiveProps = {
+    xs: 24,
+    sm: 24,
+    md: 24,
+    lg: 24,
+    xl: 12,
+    style: {marginBottom: 24}
+  };
