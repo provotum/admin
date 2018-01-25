@@ -42,13 +42,16 @@ class DeploymentContainer extends React.Component {
     this.requestZeroKnowledgeDeployment = this.requestZeroKnowledgeDeployment.bind(this);
     this.requestOpenVote = this.requestOpenVote.bind(this);
     this.requestCloseVote = this.requestCloseVote.bind(this);
+
+    let intervalId = null;
   }
 
   componentDidMount() {
     // http://localhost:8080/sockjs-websocket
     this.stompClient = new StompClient(
       "http://localhost:8080",
-      "/sockjs-websocket"
+      "/sockjs-websocket",
+      () => logger.log("[stompclient] disconnected")
     );
 
     // use arrow function so that the "this" keyword within them is actually referring to this class.
@@ -64,6 +67,10 @@ class DeploymentContainer extends React.Component {
 
     if (null !== this.votingStatusSubscription) {
       this.votingStatusSubscription.unsubscribe();
+    }
+
+    if (!this.intervalId == null) {
+      clearInterval(this.intervalId);
     }
   }
 
@@ -81,7 +88,21 @@ class DeploymentContainer extends React.Component {
     this.setState({
       isConnected: false
     });
+    this.reconnect();
   }
+
+  reconnect() {
+    this.stompClient = new StompClient(
+      "http://localhost:8080",
+      "/sockjs-websocket"
+    );
+    if (!this.state.isConnected) {
+      this.stompClient.connect(() => this.successCallback(), () => this.errorCallback());
+      this.intervalId = setInterval(() => {
+      }, 1000);
+    }
+  }
+
 
   deployBtnClickHandler(args) {
     // set the question, p and g
@@ -123,21 +144,15 @@ class DeploymentContainer extends React.Component {
   }
 
   onReceiveVotingStatus(msg) {
-    // TODO: check message and set state appropriately for statuscard.
-
-    // save to localStorage as well with key: votingOpenedTrxHashKey
     this.setState((previousState, props) => {
 
       if (msg.hasOwnProperty('status') && msg.status === 'success') {
-        if (msg.hasOwnProperty('transaction')){
-          // now save that thing also in localStorage
+        if (msg.hasOwnProperty('transaction')) {
           reactLocalStorage.set(votingOpenedTrxHashKey, msg.transaction);
-          // also update the state
           previousState.votingOpenedTrxHash = msg.transaction;
         }
       }
 
-      // will cause this component to re-render
       return {
         lastOccurredEvent: msg,
         votingOpenedTrxHash: msg.transaction,
