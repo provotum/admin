@@ -153,9 +153,11 @@ class DeploymentContainer extends React.Component {
         }
       }
 
+      // TODO: set closed vote transaction hash
+
       return {
         lastOccurredEvent: msg,
-        votingOpenedTrxHash: msg.transaction,
+        votingOpenedTrxHash: msg.transaction
       };
     });
   }
