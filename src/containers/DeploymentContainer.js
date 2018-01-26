@@ -7,10 +7,13 @@ import StatusCard from '../components/cards/StatusCard';
 import VoteBtnCard from '../components/cards/VoteBtnCard';
 import {reactLocalStorage} from 'reactjs-localstorage';
 import {Col, Row} from 'antd';
+import axios from 'axios';
+
 
 const zkContractAddressKey = 'zk-contract-address-key';
 const ballotContractAddressKey = 'ballot-contract-address-key';
 const votingOpenedTrxHashKey = 'voting-opened-trx-key';
+const votingClosedTrxHashKey = 'voting-closed-trx-key';
 
 class DeploymentContainer extends React.Component {
 
@@ -44,6 +47,7 @@ class DeploymentContainer extends React.Component {
     this.requestCloseVote = this.requestCloseVote.bind(this);
 
     let intervalId = null;
+    axios.defaults.baseURL = 'http://localhost:8080';
   }
 
   componentDidMount() {
@@ -69,6 +73,7 @@ class DeploymentContainer extends React.Component {
       this.votingStatusSubscription.unsubscribe();
     }
 
+    // Clear Interval for Reconnect task
     if (!this.intervalId == null) {
       clearInterval(this.intervalId);
     }
@@ -76,7 +81,13 @@ class DeploymentContainer extends React.Component {
 
   successCallback(msg) {
     this.deploymentSubscription = this.stompClient.subscribe('/topic/deployments', (msg) => this.onReceivedDeployment(msg));
-    this.votingStatusSubscription = this.stompClient.subscribe('/topic/voting-status', (msg) => this.onReceiveVotingStatus(msg));
+
+
+    // voting-status obsolete now, new specification:
+    // /topic/ deployments / events / votes / meta
+    // this.votingStatusSubscription = this.stompClient.subscribe('/topic/voting-status', (msg) => this.onReceiveVotingStatus(msg));
+    this.votingStatusSubscription = this.stompClient.subscribe('/topic/state', (msg) => this.onReceiveVotingStatus(msg));
+
 
     this.setState({
       isConnected: true
@@ -122,12 +133,15 @@ class DeploymentContainer extends React.Component {
   }
 
   requestOpenVote() {
-    this.stompClient.send(
-      '/websocket/contracts/ballot/open-vote',
-      {
-        'contract-address': this.state.zeroKnowledgeContractAddress
-      }
-    );
+    let query = "ballot/" + this.state.zeroKnowledgeContractAddress + "/open-vote";
+    axios.post(query)
+      .then(function (response) {
+        logger.log(response);
+      })
+      .catch(function (error) {
+        logger.log(error);
+      });
+
   }
 
   closeVoteBtnClickHandler() {
@@ -135,29 +149,40 @@ class DeploymentContainer extends React.Component {
   }
 
   requestCloseVote() {
-    this.stompClient.send(
-      '/websocket/contracts/ballot/close-vote',
-      {
-        'contract-address': this.state.zeroKnowledgeContractAddress
-      }
-    );
+    let query = "ballot/" + this.state.zeroKnowledgeContractAddress + "/close-vote";
+    axios.post(query)
+      .then(function (response) {
+        logger.log(response);
+      })
+      .catch(function (error) {
+        logger.log(error);
+      });
   }
 
   onReceiveVotingStatus(msg) {
     this.setState((previousState, props) => {
 
-      if (msg.hasOwnProperty('status') && msg.status === 'success') {
-        if (msg.hasOwnProperty('transaction')) {
+      if (msg.hasOwnProperty('responseType') && msg.status === 'success') {
+        if (msg.responseType == 'open-vote') {
           reactLocalStorage.set(votingOpenedTrxHashKey, msg.transaction);
           previousState.votingOpenedTrxHash = msg.transaction;
+        } else if (msg.responseType == 'close-vote') {
+          reactLocalStorage.set(votingClosedTrxHashKey, msg.transaction);
+          previousState.votingClosedTrxHash = msg.transaction;
+        }
+      } else if (msg.hasOwnProperty('responseType') && msg.status == 'error') {
+        if (msg.responseType == 'open-vote') {
+          logger.log("Error on open-vote" + msg);
+        } else if (msg.responseType == 'close-vote') {
+          logger.log("Error on close-vote" + msg);
         }
       }
 
-      // TODO: set closed vote transaction hash
-
       return {
         lastOccurredEvent: msg,
-        votingOpenedTrxHash: msg.transaction
+        votingOpenedTrxHash: previousState.votingOpenedTrxHash,
+        votingClosedTrxHash: previousState.votingClosedTrxHash
+
       };
     });
   }
@@ -165,7 +190,6 @@ class DeploymentContainer extends React.Component {
   onReceivedDeployment(msg) {
     // will cause this component to re-render
     this.setState((previousState, props) => {
-
       if (msg.hasOwnProperty('status') && msg.status === 'success') {
         if (msg.hasOwnProperty('contract') && msg.contract.type === 'zero-knowledge') {
           this.requestBallotDeployment(msg.contract.address);
@@ -180,7 +204,6 @@ class DeploymentContainer extends React.Component {
           previousState.ballotContractAddress = msg.contract.address;
         }
       }
-
       return {
         lastOccurredEvent: msg,
         zeroKnowledgeContractAddress: previousState.zeroKnowledgeContractAddress,
@@ -190,33 +213,31 @@ class DeploymentContainer extends React.Component {
   }
 
   requestBallotDeployment(zeroKnowledgeContractAddress) {
-    this.stompClient.send(
-      "/websocket/contracts/ballot/deploy",
-      {
-        "addresses": {
-          "zero-knowledge": zeroKnowledgeContractAddress
-        },
-        "election": {
-          "question": this.state.deploymentContext.question,
-          "public-key": {
-            "p": this.state.deploymentContext.p,
-            "g": this.state.deploymentContext.g
-          }
-        }
-      }
-    );
+    axios.post('/ballot/deploy', {
+      "election": {
+        "question": this.state.deploymentContext.question,
+        "public-key": {"p": this.state.deploymentContext.p, "g": this.state.deploymentContext.g}
+      }, "addresses": {"zero-knowledge": zeroKnowledgeContractAddress}
+    })
+      .then(function (response) {
+        logger.log(response);
+      })
+      .catch(function (error) {
+        logger.log(error);
+      });
   }
 
   requestZeroKnowledgeDeployment(args) {
-    this.stompClient.send(
-      '/websocket/contracts/zero-knowledge/deploy',
-      {
-        'public-key': {
-          'p': args.p,
-          'g': args.g
-        }
-      }
-    );
+    axios.post('/zero-knowledge/deploy', {
+      g: args.g,
+      p: args.p
+    })
+      .then(function (response) {
+        logger.log(response);
+      })
+      .catch(function (error) {
+        logger.log(error);
+      });
   }
 
   render() {
@@ -257,11 +278,8 @@ class DeploymentContainer extends React.Component {
 
 }
 
-DeploymentContainer
-  .propTypes = {};
-export
-default
-DeploymentContainer;
+DeploymentContainer.propTypes = {};
+export default DeploymentContainer;
 
 const
   smallColResponsiveProps = {

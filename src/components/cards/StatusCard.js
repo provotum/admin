@@ -71,7 +71,7 @@ export default class StatusCard extends React.Component {
     return (
       <Card title="Current Status" extra={<Badge style={{backgroundColor: backgroundColor}} count={connectionStatus}/>}>
         <Steps current={currentStep} size="small">
-          {stepConfiguration.steps.map((item, idx) => <Step key={item.title} title={item.title} icon={(() => (idx === currentStep && currentStep === 3) ? <Icon type="loading"/> : '')()}/>)}
+          {stepConfiguration.steps.map((item, idx) => <Step key={item.title} title={item.title} icon={(() => (idx === currentStep && currentStep === 2) ? <Icon type="loading"/> : '')()}/>)}
         </Steps>
         <div className="steps-content" style={{background: "#fafafa", marginTop: "16px", padding: '10px'}}>
           {stepConfiguration.steps[this.getCurrentStep()].content}
