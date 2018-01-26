@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge, Card, Steps} from "antd";
+import {Badge, Card, Steps, Icon} from "antd";
 import PropTypes from "prop-types";
 
 const Step = Steps.Step;
@@ -14,16 +14,27 @@ export default class StatusCard extends React.Component {
 
   getCurrentStep() {
     let index = (this.props.isConnected ? 1 : 0)
-      ^ ((this.props.zkContractAddress && this.props.ballotContractAddress) ? 3 : 0)
-      ^ ((this.props.votingOpenedTrxHash) ? 1 : 0)
-      ^ ((this.props.votingOpenedTrxHash && this.props.votingClosedTrxHash) ? 6 : 0)
-      ^ ((this.props.votingClosedTrxHash) ? 3 : 0)
-      ^ ((this.props.supportingVoteCount && this.props.opposingVoteCount) ? 1 : 0);
+      | ((this.props.zkContractAddress && this.props.ballotContractAddress) ? 2 : 0)
+      | ((this.props.votingOpenedTrxHash) ? 4 : 0)
+      | ((this.props.votingClosedTrxHash) ? 8 : 0)
+      | ((this.props.supportingVoteCount && this.props.opposingVoteCount) ? 16 : 0);
 
-    // index may be zero if not yet connected
-    return Math.max(0, (index - 1));
+
+    switch (index) {
+      case 31:
+        return 4;
+      case 15:
+        return 3;
+      case 7:
+        return 2;
+      case 3:
+        return 1;
+      case 1:
+        return 0;
+      default:
+        return 0;
+    }
   }
-
 
   render() {
     let backgroundColor = (this.props.isConnected) ? '#52c41a' : '#f5222d';
@@ -41,16 +52,12 @@ export default class StatusCard extends React.Component {
           content: "Zero-Knowledge Contract is deployed at " + this.props.zkContractAddress + ", the ballot is available at " + this.props.ballotContractAddress
         },
         {
-          title: "Voting is opened",
-          content: "The corresponding transaction is at " + this.props.votingOpenedTrxHash
-        },
-        {
-          title: "Voting ongoing",
-          content: "See the event log for information about the current vote status."
+          title: "Voting is ongoing",
+          content: "The corresponding opening transaction is at " + this.props.votingOpenedTrxHash
         },
         {
           title: "Voting closed",
-          content: "The corresponding transaction is at " + this.props.votingClosedTrxHash
+          content: "The corresponding close transaction is at " + this.props.votingClosedTrxHash
         },
         {
           title: "Results counted",
@@ -59,10 +66,12 @@ export default class StatusCard extends React.Component {
       ]
     };
 
+    const currentStep = this.getCurrentStep();
+
     return (
       <Card title="Current Status" extra={<Badge style={{backgroundColor: backgroundColor}} count={connectionStatus}/>}>
-        <Steps current={this.getCurrentStep()} size="small">
-          {stepConfiguration.steps.map(item => <Step key={item.title} title={item.title}/>)}
+        <Steps current={currentStep} size="small">
+          {stepConfiguration.steps.map((item, idx) => <Step key={item.title} title={item.title} icon={(() => (idx === currentStep && currentStep === 3) ? <Icon type="loading"/> : '')()}/>)}
         </Steps>
         <div className="steps-content" style={{background: "#fafafa", marginTop: "16px", padding: '10px'}}>
           {stepConfiguration.steps[this.getCurrentStep()].content}
