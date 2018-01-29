@@ -24,7 +24,8 @@ export default {
         new webpack.NoErrorsPlugin() // Keep errors for blaking hot reloading experience
     ],
     module: {
-        loaders: [
+      noParse: /node_modules\/provotum-stomp-client\/lib\/sock-js\/sockjs.js/,
+      loaders: [
             {test: /\.js$/, include: path.join(__dirname, 'src'), loaders: ['babel']},
             {test: /(\.css)$/, loaders: ['style', 'css']},
             {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file'},
@@ -33,4 +34,5 @@ export default {
             {test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=image/svg+xml'}
         ]
     }
+
 };
