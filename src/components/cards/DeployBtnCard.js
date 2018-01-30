@@ -29,7 +29,7 @@ class DeployBtnCard extends React.Component {
 
     let isInputDisabled = (!this.props.isDeployed) ? '' : 'disabled';
     let isButtonDisabled;
-    if (this.props.isDeployed | hasErrors(getFieldsError())) {
+    if (!this.props.isConnected |this.props.isDeployed | hasErrors(getFieldsError())) {
       isButtonDisabled = true;
     }
 
@@ -76,6 +76,7 @@ class DeployBtnCard extends React.Component {
 }
 
 DeployBtnCard.propTypes = {
+  isConnected: PropTypes.bool.isRequired,
   isDeployed: PropTypes.bool.isRequired,
   actions: PropTypes.shape({
     onClickHandler: PropTypes.func.isRequired

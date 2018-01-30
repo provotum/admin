@@ -87,7 +87,7 @@ class DeploymentContainer extends React.Component {
     // /topic/ deployments / events / votes / meta
     // this.votingStatusSubscription = this.stompClient.subscribe('/topic/voting-status', (msg) => this.onReceiveVotingStatus(msg));
     this.votingStatusSubscription = this.stompClient.subscribe('/topic/state', (msg) => this.onReceiveVotingStatus(msg));
-
+    // TODO Add Blockchain Events Subscriptions
 
     this.setState({
       isConnected: true
@@ -103,6 +103,7 @@ class DeploymentContainer extends React.Component {
   }
 
   reconnect() {
+      // TODO: Improve this, really gets out of hand and spams the console with: GET http://localhost:8080/sockjs-websocket/info?t=1517323725399 net::ERR_CONNECTION_REFUSED
     this.stompClient = new StompClient(
       "http://localhost:8080",
       "/sockjs-websocket"
@@ -110,7 +111,7 @@ class DeploymentContainer extends React.Component {
     if (!this.state.isConnected) {
       this.stompClient.connect(() => this.successCallback(), () => this.errorCallback());
       this.intervalId = setInterval(() => {
-      }, 1000);
+      }, 10000);
     }
   }
 
@@ -259,6 +260,7 @@ class DeploymentContainer extends React.Component {
         <Row gutter={24}>
           <Col {...smallColResponsiveProps}>
             <DeployBtnCard
+              isConnected={this.state.isConnected}
               isDeployed={(this.state.isConnected && Boolean(this.state.zeroKnowledgeContractAddress) && Boolean(this.state.ballotContractAddress))}
               actions={{onClickHandler: this.deployBtnClickHandler}}/>
           </Col>

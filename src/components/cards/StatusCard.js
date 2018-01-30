@@ -45,7 +45,7 @@ export default class StatusCard extends React.Component {
       steps: [
         {
           title: "Ready",
-          content: "Backend Application is ready to deploy a new vote"
+          content: "Backend Application is ready to deploy a new vote."
         },
         {
           title: "Contracts Deployed",
