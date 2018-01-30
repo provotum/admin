@@ -27,7 +27,7 @@ class DeployBtnCard extends React.Component {
   render() {
     const {getFieldDecorator, getFieldsError} = this.props.form;
 
-    let isInputDisabled = (!this.props.isDeployed) ? '' : 'disabled';
+    let isInputDisabled = (!this.props.isDeployed) ? false : true;
     let isButtonDisabled;
     if (!this.props.isConnected |this.props.isDeployed | hasErrors(getFieldsError())) {
       isButtonDisabled = true;

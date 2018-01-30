@@ -103,15 +103,18 @@ class DeploymentContainer extends React.Component {
   }
 
   reconnect() {
-      // TODO: Improve this, really gets out of hand and spams the console with: GET http://localhost:8080/sockjs-websocket/info?t=1517323725399 net::ERR_CONNECTION_REFUSED
+    // TODO: Improve this, really gets out of hand and spams the console with: GET http://localhost:8080/sockjs-websocket/info?t=1517323725399 net::ERR_CONNECTION_REFUSED
+    // Now reconnecting every 3 seconds.
+
     this.stompClient = new StompClient(
       "http://localhost:8080",
       "/sockjs-websocket"
     );
+
     if (!this.state.isConnected) {
-      this.stompClient.connect(() => this.successCallback(), () => this.errorCallback());
       this.intervalId = setInterval(() => {
-      }, 10000);
+        this.stompClient.connect(() => this.successCallback(), () => this.errorCallback());
+      }, 3000);
     }
   }
 
