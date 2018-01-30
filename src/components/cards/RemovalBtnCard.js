@@ -13,7 +13,7 @@ export default class RemovalBtnCard extends React.Component {
         <p>
           <Button type="dashed" icon="download" onClick={this.props.actions.onClickHandler()}>Deploy</Button></p>
       </Card>
-    )
+    );
   }
 }
 

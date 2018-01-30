@@ -27,7 +27,8 @@ class DashboardPage extends React.Component {
 }
 
 DashboardPage.propTypes = {
-  match: PropTypes.object
+  match: PropTypes.object,
+  location: PropTypes.object.isRequired
 };
 
 export default DashboardPage;
