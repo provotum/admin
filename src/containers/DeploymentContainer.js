@@ -258,7 +258,9 @@ class DeploymentContainer extends React.Component {
         </Row>
         <Row gutter={24}>
           <Col {...smallColResponsiveProps}>
-            <DeployBtnCard actions={{onClickHandler: this.deployBtnClickHandler}}/>
+            <DeployBtnCard
+              isDeployed={(this.state.isConnected && Boolean(this.state.zeroKnowledgeContractAddress) && Boolean(this.state.ballotContractAddress))}
+              actions={{onClickHandler: this.deployBtnClickHandler}}/>
           </Col>
           <Col {...smallColResponsiveProps}>
             <VoteBtnCard
