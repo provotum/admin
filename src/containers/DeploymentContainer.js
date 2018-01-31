@@ -46,7 +46,6 @@ class DeploymentContainer extends React.Component {
     this.requestOpenVote = this.requestOpenVote.bind(this);
     this.requestCloseVote = this.requestCloseVote.bind(this);
 
-    let intervalId = null;
     axios.defaults.baseURL = 'http://localhost:8080';
   }
 
@@ -74,7 +73,7 @@ class DeploymentContainer extends React.Component {
     }
 
     // Clear Interval for Reconnect task
-    if (!this.intervalId == null) {
+    if (!this.intervalId === null) {
       clearInterval(this.intervalId);
     }
   }
@@ -111,8 +110,9 @@ class DeploymentContainer extends React.Component {
       "/sockjs-websocket"
     );
 
+
     if (!this.state.isConnected) {
-      this.intervalId = setInterval(() => {
+      setTimeout(() => {
         this.stompClient.connect(() => this.successCallback(), () => this.errorCallback());
       }, 3000);
     }
