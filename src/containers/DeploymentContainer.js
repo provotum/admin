@@ -148,7 +148,7 @@ class DeploymentContainer extends React.Component {
   }
 
   requestOpenVote() {
-    let query = "ballot/" + this.state.zeroKnowledgeContractAddress + "/open-vote";
+    let query = "ballot/" + this.state.ballotContractAddress + "/open-vote";
     axios.post(query)
       .then(function (response) {
         logger.log(response);
