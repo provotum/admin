@@ -32,12 +32,17 @@ class DeploymentContainer extends React.Component {
       opposingVoteCount: null
     };
 
-    this.deploymentSubscription = null;
-    this.votingStatusSubscription = null;
+    this.deploymentSubscription = null; // /topic/deployments -- "responseType": "<ballot-deployed|zero-knowledge-deployed>"
+    this.votingStatusSubscription = null; // /topic/state -- "responseType": "<open-vote|close-vote>"
+    this.contractRemovalSubscription = null; // /topic/removals -- "responseType": "<ballot-removed|zero-knowledge-removed>"
+    this.metaSubscription = null; // /topic/meta" -- "responseType": "get-question-event", "responseType": "get-results-event",
+    this.blockchainEvents = null; // /topic/events -- "responseType": "<vote-event|change-event|proof-event>",
+
 
     this.deployBtnClickHandler = this.deployBtnClickHandler.bind(this);
     this.openVoteBtnClickHandler = this.openVoteBtnClickHandler.bind(this);
     this.closeVoteBtnClickHandler = this.closeVoteBtnClickHandler.bind(this);
+    this.removeContractBtnClickHandler = this.removeContractBtnClickHandler.bind(this);
 
     this.onReceivedDeployment = this.onReceivedDeployment.bind(this);
     this.onReceiveVotingStatus = this.onReceiveVotingStatus.bind(this);
@@ -72,6 +77,20 @@ class DeploymentContainer extends React.Component {
       this.votingStatusSubscription.unsubscribe();
     }
 
+    if (null !== this.contractRemovalSubscription) {
+      this.contractRemovalSubscription.unsubscribe();
+    }
+
+    if (null !== this.metaSubscription) {
+      this.metaSubscription.unsubscribe();
+    }
+
+    if (null !== this.blockchainEventSubscription) {
+      this.blockchainEventSubscription.unsubscribe();
+    }
+
+    // unsub from all all other subscriptions
+
     // Clear Interval for Reconnect task
     if (!this.intervalId === null) {
       clearInterval(this.intervalId);
@@ -79,14 +98,12 @@ class DeploymentContainer extends React.Component {
   }
 
   successCallback(msg) {
+
     this.deploymentSubscription = this.stompClient.subscribe('/topic/deployments', (msg) => this.onReceivedDeployment(msg));
-
-
-    // voting-status obsolete now, new specification:
-    // /topic/ deployments / events / votes / meta
-    // this.votingStatusSubscription = this.stompClient.subscribe('/topic/voting-status', (msg) => this.onReceiveVotingStatus(msg));
     this.votingStatusSubscription = this.stompClient.subscribe('/topic/state', (msg) => this.onReceiveVotingStatus(msg));
-    // TODO Add Blockchain Events Subscriptions
+    this.contractRemovalSubscription = this.stompClient.subscribe('/topic/removals', (msg) => this.onReceiveRemoveContract(msg));
+    this.metaSubscription = this.stompClient.subscribe('/topic/meta', (msg) => this.onReceiveMeta(msg));
+    this.blockchainEventSubscription = this.stompClient.subscribe('/topic/events', (msg) => this.onReceiveBlockchain(msg));
 
     this.setState({
       isConnected: true
@@ -102,14 +119,10 @@ class DeploymentContainer extends React.Component {
   }
 
   reconnect() {
-    // TODO: Improve this, really gets out of hand and spams the console with: GET http://localhost:8080/sockjs-websocket/info?t=1517323725399 net::ERR_CONNECTION_REFUSED
-    // Now reconnecting every 3 seconds.
-
     this.stompClient = new StompClient(
       "http://localhost:8080",
       "/sockjs-websocket"
     );
-
 
     if (!this.state.isConnected) {
       setTimeout(() => {
@@ -163,9 +176,34 @@ class DeploymentContainer extends React.Component {
       });
   }
 
+  removeContractBtnClickHandler() {
+    this.removeContracts();
+  }
+
+  removeContracts() {
+    // zero-knowledge/{contractAddress}/remove
+    let zkQuery = "/zero-knowledge/" + this.state.zeroKnowledgeContractAddress + "/remove";
+    let ballotQuery = "/ballot/" + this.state.ballotContractAddress + "/remove";
+
+    axios.delete(zkQuery)
+      .then(function (response) {
+        logger.log(response);
+      })
+      .catch(function (error) {
+        logger.log(error);
+      });
+
+    axios.delete(ballotQuery)
+      .then(function (response) {
+        logger.log(response);
+      })
+      .catch(function (error) {
+        logger.log(error);
+      });
+  }
+
   onReceiveVotingStatus(msg) {
     this.setState((previousState, props) => {
-
       if (msg.hasOwnProperty('responseType') && msg.status === 'success') {
         if (msg.responseType == 'open-vote') {
           reactLocalStorage.set(votingOpenedTrxHashKey, msg.transaction);
@@ -215,6 +253,44 @@ class DeploymentContainer extends React.Component {
       };
     });
   }
+
+
+  //   this.contractRemovalSubscription = this.stompClient.subscribe('/topic/removals',(msg) => this.onReceiveRemoveContract(msg));
+  onReceiveRemoveContract(msg) {
+    this.setState((previousState, props) => {
+      if (msg.hasOwnProperty('status') && msg.status === 'success') {
+        if (msg.responseType === 'zero-knowledge-removed') {
+          // now set zkContract to null in local storage
+          reactLocalStorage.set(zkContractAddressKey, null);
+          // also update the state
+          previousState.zeroKnowledgeContractAddress = null;
+
+        } else if (msg.responseType === 'ballot-removed') {
+          // now save that thing also in localStorage
+          reactLocalStorage.set(ballotContractAddressKey, null);
+          // also update the state
+          previousState.ballotContractAddress = null;
+          previousState.votingOpenedTrxHash = null;
+        }
+      }
+
+      if (msg.hasOwnProperty('status') && msg.status === 'error') {
+        if (msg.responseType === 'zero-knowledge-removed') {
+          logger.log("zero-knowledge-removed failed");
+        } else if (msg.responseType === 'ballot-removed') {
+          logger.log("ballot-removed failed");
+        }
+      }
+
+      return {
+        lastOccurredEvent: msg,
+        zeroKnowledgeContractAddress: previousState.zeroKnowledgeContractAddress,
+        ballotContractAddress: previousState.ballotContractAddress,
+        votingOpenedTrxHashKey: previousState.votingOpenedTrxHash
+      };
+    });
+  }
+
 
   requestBallotDeployment(zeroKnowledgeContractAddress) {
     axios.post('/ballot/deploy', {
@@ -270,9 +346,12 @@ class DeploymentContainer extends React.Component {
           <Col {...smallColResponsiveProps}>
             <VoteBtnCard
               isDeployed={(this.state.isConnected && Boolean(this.state.zeroKnowledgeContractAddress) && Boolean(this.state.ballotContractAddress))}
+              votingOpenedTrxHash={this.state.votingOpenedTrxHash}
+              votingClosedTrxHash={this.state.votingClosedTrxHash}
               actions={{
                 onOpenVoteHandler: this.openVoteBtnClickHandler,
-                onCloseVoteHandler: this.closeVoteBtnClickHandler
+                onCloseVoteHandler: this.closeVoteBtnClickHandler,
+                onRemoveContractHandler: this.removeContractBtnClickHandler
               }}/>
           </Col>
           <Col {...wideColResponsiveProps}>

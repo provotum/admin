@@ -29,7 +29,7 @@ class DeployBtnCard extends React.Component {
 
     let isInputDisabled = (!this.props.isDeployed) ? false : true;
     let isButtonDisabled;
-    if (!this.props.isConnected |this.props.isDeployed | hasErrors(getFieldsError())) {
+    if (!this.props.isConnected | this.props.isDeployed | hasErrors(getFieldsError())) {
       isButtonDisabled = true;
     }
 
@@ -41,7 +41,8 @@ class DeployBtnCard extends React.Component {
               {getFieldDecorator('question', {
                 rules: [{required: true, message: 'Please enter a valid question!'}]
               })(
-                <Input disabled={isInputDisabled} prefix={<Icon type="question-circle-o" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                <Input disabled={isInputDisabled}
+                       prefix={<Icon type="question-circle-o" style={{color: 'rgba(0,0,0,.25)'}}/>}
                        placeholder="Voting question"/>
               )}
             </Form.Item>
