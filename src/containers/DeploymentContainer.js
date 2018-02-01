@@ -36,8 +36,8 @@ class DeploymentContainer extends React.Component {
     this.votingStatusSubscription = null; // /topic/state -- "responseType": "<open-vote|close-vote>"
     this.contractRemovalSubscription = null; // /topic/removals -- "responseType": "<ballot-removed|zero-knowledge-removed>"
     this.metaSubscription = null; // /topic/meta" -- "responseType": "get-question-event", "responseType": "get-results-event",
-    this.blockchainEvents = null; // /topic/events -- "responseType": "<vote-event|change-event|proof-event>",
-
+    this.voteSubscription = null; // /topic/votes --   "responseType": "<vote|vote-event>",
+    this.blockchainEventSubscription = null; // /topic/events -- "responseType": "<vote-event|change-event|proof-event>",
 
     this.deployBtnClickHandler = this.deployBtnClickHandler.bind(this);
     this.openVoteBtnClickHandler = this.openVoteBtnClickHandler.bind(this);
@@ -85,15 +85,12 @@ class DeploymentContainer extends React.Component {
       this.metaSubscription.unsubscribe();
     }
 
-    if (null !== this.blockchainEventSubscription) {
-      this.blockchainEventSubscription.unsubscribe();
+    if (null !== this.metaSubscription) {
+      this.metaSubscription.unsubscribe();
     }
 
-    // unsub from all all other subscriptions
-
-    // Clear Interval for Reconnect task
-    if (!this.intervalId === null) {
-      clearInterval(this.intervalId);
+    if (null !== this.blockchainEventSubscription) {
+      this.blockchainEventSubscription.unsubscribe();
     }
   }
 
@@ -103,6 +100,7 @@ class DeploymentContainer extends React.Component {
     this.votingStatusSubscription = this.stompClient.subscribe('/topic/state', (msg) => this.onReceiveVotingStatus(msg));
     this.contractRemovalSubscription = this.stompClient.subscribe('/topic/removals', (msg) => this.onReceiveRemoveContract(msg));
     this.metaSubscription = this.stompClient.subscribe('/topic/meta', (msg) => this.onReceiveMeta(msg));
+    this.voteSubscription = this.stompClient.subscribe('/topic/votes', (msg) => this.onReceiveVotes(msg));
     this.blockchainEventSubscription = this.stompClient.subscribe('/topic/events', (msg) => this.onReceiveBlockchain(msg));
 
     this.setState({
@@ -158,7 +156,6 @@ class DeploymentContainer extends React.Component {
       .catch(function (error) {
         logger.log(error);
       });
-
   }
 
   closeVoteBtnClickHandler() {
@@ -227,6 +224,21 @@ class DeploymentContainer extends React.Component {
 
       };
     });
+  }
+
+
+  onReceiveVotes(msg) {
+    /*{
+     "id": "<UUID>",
+     "responseType": "<vote>",
+     "status": "<success|error>",
+     "transaction": "<sender addresss>",
+     "message": "optional message, may be an empty string",
+     }*/
+    this.setState({
+      lastOccurredEvent: msg
+    });
+
   }
 
   onReceivedDeployment(msg) {

@@ -1,8 +1,7 @@
 import React from "react";
-import {Badge, List, Card, Icon, Avatar} from "antd";
+import {List, Card, Avatar} from "antd";
 import PropTypes from "prop-types";
 import ClearBtn from "./ClearBtn";
-import logger from "react-logger";
 
 export default class EventLogCard extends React.Component {
 

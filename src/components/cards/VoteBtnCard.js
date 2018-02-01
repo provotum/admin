@@ -56,8 +56,8 @@ class VoteBtnCard extends React.Component {
 
 VoteBtnCard.propTypes = {
   isDeployed: PropTypes.bool.isRequired,
-  votingOpenedTrxHash: PropTypes.bool.isRequired,
-  votingClosedTrxHash: PropTypes.bool.isRequired,
+  votingOpenedTrxHash: PropTypes.string,
+  votingClosedTrxHash: PropTypes.string,
   actions: PropTypes.shape({
     onOpenVoteHandler: PropTypes.func.isRequired,
     onCloseVoteHandler: PropTypes.func.isRequired,
