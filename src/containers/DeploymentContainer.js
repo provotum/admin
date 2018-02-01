@@ -189,14 +189,14 @@ class DeploymentContainer extends React.Component {
   onReceiveMeta(msg) {
     this.setState((previousState, props) => {
       if (msg.hasOwnProperty('responseType') && msg.status === 'success') {
-        if (msg.responseType == 'get-results-event') {
+        if (msg.responseType === 'get-results-event') {
           // this will be obsolete once HE is implemented since we will only get a final result (HE is done on server, only final result retrieved)
           previousState.supportingVoteCount= 1;
           previousState.opposingVoteCount = 12;
         }
       }
       if (msg.hasOwnProperty('responseType') && msg.status === 'error') {
-        if (msg.responseType == 'get-results-event') {
+        if (msg.responseType === 'get-results-event') {
           // if fetching results failed, this will loop until it works
           this.requestResults();
         }
@@ -241,18 +241,18 @@ class DeploymentContainer extends React.Component {
   onReceiveVotingStatus(msg) {
     this.setState((previousState, props) => {
       if (msg.hasOwnProperty('responseType') && msg.status === 'success') {
-        if (msg.responseType == 'open-vote') {
+        if (msg.responseType === 'open-vote') {
           reactLocalStorage.set(votingOpenedTrxHashKey, msg.transaction);
           previousState.votingOpenedTrxHash = msg.transaction;
-        } else if (msg.responseType == 'close-vote') {
+        } else if (msg.responseType === 'close-vote') {
           reactLocalStorage.set(votingClosedTrxHashKey, msg.transaction);
           previousState.votingClosedTrxHash = msg.transaction;
           this.requestResults();
         }
-      } else if (msg.hasOwnProperty('responseType') && msg.status == 'error') {
-        if (msg.responseType == 'open-vote') {
+      } else if (msg.hasOwnProperty('responseType') && msg.status === 'error') {
+        if (msg.responseType === 'open-vote') {
           logger.log("Error on open-vote" + msg);
-        } else if (msg.responseType == 'close-vote') {
+        } else if (msg.responseType === 'close-vote') {
           logger.log("Error on close-vote" + msg);
         }
       }
