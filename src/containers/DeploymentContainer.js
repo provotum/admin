@@ -171,8 +171,6 @@ class DeploymentContainer extends React.Component {
       .catch(function (error) {
         logger.log(error);
       });
-
-    this.requestResults();
   }
 
   requestResults(){
@@ -249,6 +247,7 @@ class DeploymentContainer extends React.Component {
         } else if (msg.responseType == 'close-vote') {
           reactLocalStorage.set(votingClosedTrxHashKey, msg.transaction);
           previousState.votingClosedTrxHash = msg.transaction;
+          this.requestResults();
         }
       } else if (msg.hasOwnProperty('responseType') && msg.status == 'error') {
         if (msg.responseType == 'open-vote') {
