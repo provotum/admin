@@ -51,6 +51,8 @@ class DeploymentContainer extends React.Component {
     this.requestOpenVote = this.requestOpenVote.bind(this);
     this.requestCloseVote = this.requestCloseVote.bind(this);
 
+    this.onReceiveBlockchainEvent = this.onReceiveBlockchainEvent.bind(this);
+
     axios.defaults.baseURL = 'http://localhost:8080';
   }
 
@@ -92,6 +94,10 @@ class DeploymentContainer extends React.Component {
     if (null !== this.blockchainEventSubscription) {
       this.blockchainEventSubscription.unsubscribe();
     }
+
+    if (null !== this.voteSubscription) {
+      this.voteSubscription.unsubscribe();
+    }
   }
 
   successCallback(msg) {
@@ -101,7 +107,7 @@ class DeploymentContainer extends React.Component {
     this.contractRemovalSubscription = this.stompClient.subscribe('/topic/removals', (msg) => this.onReceiveRemoveContract(msg));
     this.metaSubscription = this.stompClient.subscribe('/topic/meta', (msg) => this.onReceiveMeta(msg));
     this.voteSubscription = this.stompClient.subscribe('/topic/votes', (msg) => this.onReceiveVotes(msg));
-    this.blockchainEventSubscription = this.stompClient.subscribe('/topic/events', (msg) => this.onReceiveBlockchain(msg));
+    this.blockchainEventSubscription = this.stompClient.subscribe('/topic/events', (msg) => this.onReceiveBlockchainEvent(msg));
 
     this.setState({
       isConnected: true
@@ -263,6 +269,12 @@ class DeploymentContainer extends React.Component {
         votingClosedTrxHash: previousState.votingClosedTrxHash
 
       };
+    });
+  }
+
+  onReceiveBlockchainEvent(msg) {
+    this.setState({
+      lastOccurredEvent: msg
     });
   }
 
