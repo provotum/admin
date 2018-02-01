@@ -163,8 +163,23 @@ class DeploymentContainer extends React.Component {
   }
 
   requestCloseVote() {
-    let query = "ballot/" + this.state.zeroKnowledgeContractAddress + "/close-vote";
-    axios.post(query)
+    let closeQuery = "ballot/" + this.state.zeroKnowledgeContractAddress + "/close-vote";
+    axios.post(closeQuery)
+      .then(function (response) {
+        logger.log(response);
+      })
+      .catch(function (error) {
+        logger.log(error);
+      });
+
+    this.requestResults();
+  }
+
+  requestResults(){
+    // POST /ballot/{contractAddress}/question No body has to be provided.
+    // also request results right away
+    let resultsQuery = "ballot/" + this.state.ballotContractAddress + "/results";
+    axios.post(resultsQuery)
       .then(function (response) {
         logger.log(response);
       })
@@ -172,6 +187,32 @@ class DeploymentContainer extends React.Component {
         logger.log(error);
       });
   }
+
+  onReceiveMeta(msg) {
+    this.setState((previousState, props) => {
+      if (msg.hasOwnProperty('responseType') && msg.status === 'success') {
+        if (msg.responseType == 'get-results-event') {
+          // this will be obsolete once HE is implemented since we will only get a final result (HE is done on server, only final result retrieved)
+          previousState.supportingVoteCount= 1;
+          previousState.opposingVoteCount = 12;
+        }
+      }
+      if (msg.hasOwnProperty('responseType') && msg.status === 'error') {
+        if (msg.responseType == 'get-results-event') {
+          // if fetching results failed, this will loop until it works
+          this.requestResults();
+        }
+      }
+
+      return {
+        lastOccurredEvent: msg,
+        supportingVoteCount: previousState.supportingVoteCount,
+        opposingVoteCount: previousState.opposingVoteCount
+
+      };
+    });
+  }
+
 
   removeContractBtnClickHandler() {
     this.removeContracts();
@@ -228,17 +269,9 @@ class DeploymentContainer extends React.Component {
 
 
   onReceiveVotes(msg) {
-    /*{
-     "id": "<UUID>",
-     "responseType": "<vote>",
-     "status": "<success|error>",
-     "transaction": "<sender addresss>",
-     "message": "optional message, may be an empty string",
-     }*/
     this.setState({
       lastOccurredEvent: msg
     });
-
   }
 
   onReceivedDeployment(msg) {
