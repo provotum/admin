@@ -17,7 +17,7 @@ export default class StatusCard extends React.Component {
       | ((this.props.zkContractAddress && this.props.ballotContractAddress) ? 2 : 0)
       | ((this.props.votingOpenedTrxHash) ? 4 : 0)
       | ((this.props.votingClosedTrxHash) ? 8 : 0)
-      | ((this.props.supportingVoteCount && this.props.opposingVoteCount) ? 16 : 0);
+      | ((this.props.supportingVoteCount !== null && this.props.opposingVoteCount !== null) ? 16 : 0);
 
 
     switch (index) {

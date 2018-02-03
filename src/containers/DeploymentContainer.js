@@ -43,6 +43,7 @@ class DeploymentContainer extends React.Component {
     this.openVoteBtnClickHandler = this.openVoteBtnClickHandler.bind(this);
     this.closeVoteBtnClickHandler = this.closeVoteBtnClickHandler.bind(this);
     this.removeContractBtnClickHandler = this.removeContractBtnClickHandler.bind(this);
+    this.retrieveResultsClickHandler = this.retrieveResultsClickHandler.bind(this);
 
     this.onReceivedDeployment = this.onReceivedDeployment.bind(this);
     this.onReceiveVotingStatus = this.onReceiveVotingStatus.bind(this);
@@ -50,6 +51,7 @@ class DeploymentContainer extends React.Component {
     this.requestZeroKnowledgeDeployment = this.requestZeroKnowledgeDeployment.bind(this);
     this.requestOpenVote = this.requestOpenVote.bind(this);
     this.requestCloseVote = this.requestCloseVote.bind(this);
+    this.retrieveResults = this.retrieveResults.bind(this);
 
     this.onReceiveBlockchainEvent = this.onReceiveBlockchainEvent.bind(this);
 
@@ -81,10 +83,6 @@ class DeploymentContainer extends React.Component {
 
     if (null !== this.contractRemovalSubscription) {
       this.contractRemovalSubscription.unsubscribe();
-    }
-
-    if (null !== this.metaSubscription) {
-      this.metaSubscription.unsubscribe();
     }
 
     if (null !== this.metaSubscription) {
@@ -169,21 +167,8 @@ class DeploymentContainer extends React.Component {
   }
 
   requestCloseVote() {
-    let closeQuery = "ballot/" + this.state.zeroKnowledgeContractAddress + "/close-vote";
+    let closeQuery = "ballot/" + this.state.ballotContractAddress + "/close-vote";
     axios.post(closeQuery)
-      .then(function (response) {
-        logger.log(response);
-      })
-      .catch(function (error) {
-        logger.log(error);
-      });
-  }
-
-  requestResults(){
-    // POST /ballot/{contractAddress}/question No body has to be provided.
-    // also request results right away
-    let resultsQuery = "ballot/" + this.state.ballotContractAddress + "/results";
-    axios.post(resultsQuery)
       .then(function (response) {
         logger.log(response);
       })
@@ -197,14 +182,26 @@ class DeploymentContainer extends React.Component {
       if (msg.hasOwnProperty('responseType') && msg.status === 'success') {
         if (msg.responseType === 'get-results-event') {
           // this will be obsolete once HE is implemented since we will only get a final result (HE is done on server, only final result retrieved)
-          previousState.supportingVoteCount= 1;
-          previousState.opposingVoteCount = 12;
+
+          let supportingVoteCount = 0;
+          let opposingVoteCount = 0;
+          for (let address in msg.votes) {
+              if (msg.votes.hasOwnProperty(address) && msg.votes[address] === 1) {
+                supportingVoteCount++;
+              } else {
+                opposingVoteCount++;
+              }
+          }
+
+          previousState.supportingVoteCount = supportingVoteCount;
+          previousState.opposingVoteCount = opposingVoteCount;
         }
       }
+
       if (msg.hasOwnProperty('responseType') && msg.status === 'error') {
         if (msg.responseType === 'get-results-event') {
           // if fetching results failed, this will loop until it works
-          this.requestResults();
+          logger.error(msg);
         }
       }
 
@@ -215,6 +212,18 @@ class DeploymentContainer extends React.Component {
 
       };
     });
+  }
+
+  retrieveResultsClickHandler() {
+    this.retrieveResults();
+  }
+
+  retrieveResults() {
+    let query = "/ballot/" + this.state.ballotContractAddress + "/results";
+
+    axios.post(query)
+      .then((response) => logger.log(response))
+      .catch((error) => logger.log(error));
   }
 
 
@@ -253,7 +262,6 @@ class DeploymentContainer extends React.Component {
         } else if (msg.responseType === 'close-vote') {
           reactLocalStorage.set(votingClosedTrxHashKey, msg.transaction);
           previousState.votingClosedTrxHash = msg.transaction;
-          this.requestResults();
         }
       } else if (msg.hasOwnProperty('responseType') && msg.status === 'error') {
         if (msg.responseType === 'open-vote') {
@@ -407,7 +415,8 @@ class DeploymentContainer extends React.Component {
               actions={{
                 onOpenVoteHandler: this.openVoteBtnClickHandler,
                 onCloseVoteHandler: this.closeVoteBtnClickHandler,
-                onRemoveContractHandler: this.removeContractBtnClickHandler
+                onRemoveContractHandler: this.removeContractBtnClickHandler,
+                onGetResultsHandler: this.retrieveResultsClickHandler
               }}/>
           </Col>
           <Col {...wideColResponsiveProps}>
