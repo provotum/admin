@@ -9,6 +9,7 @@ class VoteBtnCard extends React.Component {
     this.handleOpenVoteClick = this.handleOpenVoteClick.bind(this);
     this.handleCloseVoteClick = this.handleCloseVoteClick.bind(this);
     this.handleRemoveContractClick = this.handleRemoveContractClick.bind(this);
+    this.handleGetResultsClick = this.handleGetResultsClick.bind(this);
   }
 
   handleOpenVoteClick(e) {
@@ -24,6 +25,11 @@ class VoteBtnCard extends React.Component {
   handleRemoveContractClick(e) {
     e.preventDefault();
     this.props.actions.onRemoveContractHandler();
+  }
+
+  handleGetResultsClick(e) {
+    e.preventDefault();
+    this.props.actions.onGetResultsHandler();
   }
 
   render() {
@@ -44,6 +50,11 @@ class VoteBtnCard extends React.Component {
         </Row>
         <Row>
           <Col span={12} style={{textAlign: 'left'}}>
+            <Button type="primary" disabled={(() =>
+              ((this.props.votingOpenedTrxHash !== null || this.props.votingClosedTrxHash !== null || !this.props.isDeployed) ? '' : 'disabled'))()}
+                    onClick={this.handleGetResultsClick}>Get Results</Button>
+          </Col>
+          <Col span={12} style={{textAlign: 'right'}}>
             <Button type="danger" disabled={(() =>
               ((this.props.votingOpenedTrxHash === null && this.props.isDeployed) ? '' : 'disabled'))()}
                     onClick={this.handleRemoveContractClick}>Delete Contracts</Button>
@@ -61,7 +72,8 @@ VoteBtnCard.propTypes = {
   actions: PropTypes.shape({
     onOpenVoteHandler: PropTypes.func.isRequired,
     onCloseVoteHandler: PropTypes.func.isRequired,
-    onRemoveContractHandler: PropTypes.func.isRequired
+    onRemoveContractHandler: PropTypes.func.isRequired,
+    onGetResultsHandler: PropTypes.func.isRequired
   })
 };
 
