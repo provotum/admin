@@ -181,28 +181,13 @@ class DeploymentContainer extends React.Component {
 
   onReceiveMeta(msg) {
     this.setState((previousState, props) => {
-      if (msg.hasOwnProperty('responseType') && msg.status === 'success') {
-        if (msg.responseType === 'get-results-event') {
-          // this will be obsolete once HE is implemented since we will only get a final result (HE is done on server, only final result retrieved)
+      if (msg.hasOwnProperty('responseType') && msg.responseType === 'get-results-event'
+        && msg.hasOwnProperty('success') && msg.status === 'success') {
 
-          let supportingVoteCount = 0;
-          let opposingVoteCount = 0;
-          for (let address in msg.votes) {
-              if (msg.votes.hasOwnProperty(address) && msg.votes[address] === 1) {
-                supportingVoteCount++;
-              } else {
-                opposingVoteCount++;
-              }
-          }
-
-          previousState.supportingVoteCount = supportingVoteCount;
-          previousState.opposingVoteCount = opposingVoteCount;
-        }
-      }
-
-      if (msg.hasOwnProperty('responseType') && msg.status === 'error') {
-        if (msg.responseType === 'get-results-event') {
-          // if fetching results failed, this will loop until it works
+        if ('success' === msg.status) {
+          previousState.supportingVoteCount = msg.votes.yes;
+          previousState.opposingVoteCount = msg.votes.no;
+        } else {
           logger.error(msg);
         }
       }
