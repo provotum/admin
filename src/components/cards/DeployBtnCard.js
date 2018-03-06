@@ -7,6 +7,7 @@ function hasErrors(fieldsError) {
 }
 
 class DeployBtnCard extends React.Component {
+
   constructor(props) {
     super(props);
 
@@ -27,9 +28,10 @@ class DeployBtnCard extends React.Component {
   render() {
     const {getFieldDecorator, getFieldsError} = this.props.form;
 
-    let isInputDisabled = (!this.props.isDeployed) ? false : true;
-    let isButtonDisabled;
-    if (!this.props.isConnected | this.props.isDeployed | hasErrors(getFieldsError())) {
+    let isInputDisabled = this.props.isDeployed;
+
+    let isButtonDisabled = false;
+    if (!this.props.isConnected || this.props.isDeploying || this.props.isDeployed || hasErrors(getFieldsError())) {
       isButtonDisabled = true;
     }
 
@@ -46,24 +48,6 @@ class DeployBtnCard extends React.Component {
                        placeholder="Voting question"/>
               )}
             </Form.Item>
-            <Form.Item label={'P'}>
-              {getFieldDecorator('p', {
-                rules: [{required: true, message: 'Please input p'}]
-              })(
-                <Input disabled={isInputDisabled} prefix={<Icon type="code-o" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                       type={'number'}
-                       placeholder="p?"/>
-              )}
-            </Form.Item>
-            <Form.Item label={'G'}>
-              {getFieldDecorator('g', {
-                rules: [{required: true, message: 'Please input g'}]
-              })(
-                <Input disabled={isInputDisabled} prefix={<Icon type="code-o" style={{color: 'rgba(0,0,0,.25)'}}/>}
-                       type={'number'}
-                       placeholder="g?"/>
-              )}
-            </Form.Item>
           </Row>
           <Row>
             <Col span={24} style={{textAlign: 'right'}}>
@@ -78,6 +62,7 @@ class DeployBtnCard extends React.Component {
 
 DeployBtnCard.propTypes = {
   isConnected: PropTypes.bool.isRequired,
+  isDeploying: PropTypes.bool.isRequired,
   isDeployed: PropTypes.bool.isRequired,
   actions: PropTypes.shape({
     onClickHandler: PropTypes.func.isRequired

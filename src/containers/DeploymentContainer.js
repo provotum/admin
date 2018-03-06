@@ -23,6 +23,7 @@ class DeploymentContainer extends React.Component {
     this.state = {
       lastOccurredEvent: null,
       isConnected: false,
+      isDeploying: false,
       zeroKnowledgeContractAddress: '',
       ballotContractAddress: '',
       deploymentContext: null,
@@ -137,6 +138,7 @@ class DeploymentContainer extends React.Component {
   deployBtnClickHandler(args) {
     // set the question, p and g
     this.setState({
+      isDeploying: true,
       deploymentContext: args
     });
 
@@ -209,7 +211,6 @@ class DeploymentContainer extends React.Component {
         lastOccurredEvent: msg,
         supportingVoteCount: previousState.supportingVoteCount,
         opposingVoteCount: previousState.opposingVoteCount
-
       };
     });
   }
@@ -308,8 +309,10 @@ class DeploymentContainer extends React.Component {
           reactLocalStorage.set(ballotContractAddressKey, msg.contract.address);
           // also update the state
           previousState.ballotContractAddress = msg.contract.address;
+          previousState.isDeploying = false;
         }
       }
+
       return {
         lastOccurredEvent: msg,
         zeroKnowledgeContractAddress: previousState.zeroKnowledgeContractAddress,
@@ -359,8 +362,7 @@ class DeploymentContainer extends React.Component {
   requestBallotDeployment(zeroKnowledgeContractAddress) {
     axios.post('/ballot/deploy', {
       "election": {
-        "question": this.state.deploymentContext.question,
-        "public-key": {"p": this.state.deploymentContext.p, "g": this.state.deploymentContext.g}
+        "question": this.state.deploymentContext.question
       }, "addresses": {"zero-knowledge": zeroKnowledgeContractAddress}
     })
       .then(function (response) {
@@ -372,10 +374,7 @@ class DeploymentContainer extends React.Component {
   }
 
   requestZeroKnowledgeDeployment(args) {
-    axios.post('/zero-knowledge/deploy', {
-      g: args.g,
-      p: args.p
-    })
+    axios.post('/zero-knowledge/deploy')
       .then(function (response) {
         logger.log(response);
       })
@@ -404,6 +403,7 @@ class DeploymentContainer extends React.Component {
           <Col {...smallColResponsiveProps}>
             <DeployBtnCard
               isConnected={this.state.isConnected}
+              isDeploying={this.state.isDeploying}
               isDeployed={(this.state.isConnected && Boolean(this.state.zeroKnowledgeContractAddress) && Boolean(this.state.ballotContractAddress))}
               actions={{onClickHandler: this.deployBtnClickHandler}}/>
           </Col>
