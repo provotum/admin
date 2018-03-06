@@ -10,14 +10,26 @@ class VoteBtnCard extends React.Component {
     this.handleOpenVoteClick = this.handleOpenVoteClick.bind(this);
     this.handleRemoveContractClick = this.handleRemoveContractClick.bind(this);
     this.handleGetResultsClick = this.handleGetResultsClick.bind(this);
+
+    this.state = {
+      opened: false,
+      closed: false
+    };
   }
 
   handleOpenVoteClick(isChecked) {
-    console.log(isChecked);
     if (true === isChecked) {
       this.props.actions.onOpenVoteHandler();
+      this.setState({
+        opened: true,
+        closed: false
+      });
     } else {
       this.props.actions.onCloseVoteHandler();
+      this.setState({
+        opened: false,
+        closed: true
+      });
     }
   }
 
@@ -44,7 +56,20 @@ class VoteBtnCard extends React.Component {
           </Col>
           <Col span={12} style={{textAlign: 'right', marginBottom: 24}}>
             <Button.Group size={"large"}>
-              <Switch disabled={openVotingDisabled || closeVotingDisabled} checkedChildren="Voting opened"
+              <Switch disabled={(() => {
+                if (! this.state.opened) {
+                  return openVotingDisabled;
+                } else {
+                  if (this.state.opened && ! this.state.closed) {
+                    return closeVotingDisabled;
+                  } else if (this.state.opened && this.state.closed) {
+                    return false;
+                  }
+                }
+
+                return false;
+              })()}
+                      checkedChildren="Voting opened"
                       unCheckedChildren="Voting closed" onChange={this.handleOpenVoteClick}/>
             </Button.Group>
             <br/>
@@ -71,7 +96,7 @@ class VoteBtnCard extends React.Component {
             <Button.Group size={"small"}>
               <Button type="danger" disabled={(() =>
                 ((this.props.votingOpenedTrxHash === null && this.props.isDeployed) ? '' : 'disabled'))()}
-                      onClick={this.handleRemoveContractClick}>Delete Contracts
+                      onClick={this.handleRemoveContractClick}>Delete
               </Button>
             </Button.Group>
           </Col>

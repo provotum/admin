@@ -182,7 +182,7 @@ class DeploymentContainer extends React.Component {
   onReceiveMeta(msg) {
     this.setState((previousState, props) => {
       if (msg.hasOwnProperty('responseType') && msg.responseType === 'get-results-event'
-        && msg.hasOwnProperty('success') && msg.status === 'success') {
+        && msg.hasOwnProperty('status') && msg.status === 'success') {
 
         if ('success' === msg.status) {
           previousState.supportingVoteCount = msg.votes.yes;
