@@ -61,7 +61,7 @@ export default class StatusCard extends React.Component {
         },
         {
           title: "Results counted",
-          content: "The voting result is " + this.props.supportingVoteCount + ' of a total of ' + (this.props.supportingVoteCount + this.props.opposingVoteCount) + ' votes'
+          content: "The voting result is (" + this.props.supportingVoteCount + ' vs. ' + this.props.opposingVoteCount +') of a total of ' + this.props.totalVoteCount + ' votes with ' + this.props.invalidVoteCount + ' invalid votes'
         }
       ]
     };
@@ -97,5 +97,7 @@ StatusCard.propTypes = {
   votingOpenedTrxHash: PropTypes.string,
   votingClosedTrxHash: PropTypes.string,
   supportingVoteCount: PropTypes.number,
-  opposingVoteCount: PropTypes.number
+  opposingVoteCount: PropTypes.number,
+  totalVoteCount: PropTypes.number,
+  invalidVoteCount: PropTypes.number
 };

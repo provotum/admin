@@ -30,7 +30,9 @@ class DeploymentContainer extends React.Component {
       votingOpenedTrxHash: null,
       votingClosedTrxHash: null,
       supportingVoteCount: null,
-      opposingVoteCount: null
+      opposingVoteCount: null,
+      invalidVoteCount: null,
+      totalVoteCount: null
     };
 
     this.deploymentSubscription = null; // /topic/deployments -- "responseType": "<ballot-deployed|zero-knowledge-deployed>"
@@ -139,7 +141,12 @@ class DeploymentContainer extends React.Component {
     // set the question, p and g
     this.setState({
       isDeploying: true,
-      deploymentContext: args
+      deploymentContext: args,
+      lastOccurredEvent: {
+        id: Date.now(),
+        status: 'success',
+        message: 'Deployment requested. Please wait...'
+      }
     });
 
     // once we got the information about what we want to deploy,
@@ -187,6 +194,8 @@ class DeploymentContainer extends React.Component {
         if ('success' === msg.status) {
           previousState.supportingVoteCount = msg.votes.yes;
           previousState.opposingVoteCount = msg.votes.no;
+          previousState.invalidVoteCount = msg.votes.invalid;
+          previousState.totalVoteCount = msg.votes.total;
         } else {
           logger.error(msg);
         }
@@ -381,6 +390,8 @@ class DeploymentContainer extends React.Component {
               votingClosedTrxHash={this.state.votingClosedTrxHash}
               opposingVoteCount={this.state.opposingVoteCount}
               supportingVoteCount={this.state.supportingVoteCount}
+              invalidVoteCount={this.state.invalidVoteCount}
+              totalVoteCount={this.state.totalVoteCount}
             />
           </Col>
         </Row>
