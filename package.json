@@ -7,7 +7,8 @@
     "start": "npm-run-all --parallel open:src lint:watch",
     "open:src": "babel-node tools/srcServer.js",
     "lint": "node_modules/.bin/esw webpack.config.* src tools",
-    "lint:watch": "npm run lint -- --watch"
+    "lint:watch": "npm run lint -- --watch",
+    "build": "webpack --config webpack.config.prod.js"
   },
   "author": "It's us!",
   "license": "MIT",
@@ -15,6 +16,7 @@
     "antd": "^3.1.4",
     "axios": "^0.17.1",
     "babel-polyfill": "6.8.0",
+    "dotenv-webpack": "^1.5.5",
     "jquery": "2.2.3",
     "prop-types": "^15.6.0",
     "provotum-stomp-client": "0.0.7",
@@ -24,7 +26,8 @@
     "react-router-dom": "^4.2.2",
     "reactjs-localstorage": "0.0.6",
     "sockjs-client": "^1.1.4",
-    "style-loader": "^0.19.1"
+    "style-loader": "^0.19.1",
+    "uglifyjs-webpack-plugin": "^1.2.3"
   },
   "devDependencies": {
     "babel-cli": "6.8.0",

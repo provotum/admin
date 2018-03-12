@@ -58,13 +58,13 @@ class DeploymentContainer extends React.Component {
 
     this.onReceiveBlockchainEvent = this.onReceiveBlockchainEvent.bind(this);
 
-    axios.defaults.baseURL = 'http://localhost:8080';
+    axios.defaults.baseURL = process.env.BACKEND;
   }
 
   componentDidMount() {
     // http://localhost:8080/sockjs-websocket
     this.stompClient = new StompClient(
-      "http://localhost:8080",
+      process.env.BACKEND,
       "/sockjs-websocket",
       () => logger.log("[stompclient] disconnected")
     );
@@ -125,7 +125,7 @@ class DeploymentContainer extends React.Component {
 
   reconnect() {
     this.stompClient = new StompClient(
-      "http://localhost:8080",
+      process.env.BACKEND,
       "/sockjs-websocket"
     );
 

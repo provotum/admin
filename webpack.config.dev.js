@@ -1,5 +1,6 @@
 import webpack from 'webpack';
 import path from 'path';
+const Dotenv = require('dotenv-webpack');
 
 export default {
     debug: true,
@@ -21,7 +22,11 @@ export default {
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(), // replace plugins without full browser refresh
-        new webpack.NoErrorsPlugin() // Keep errors for blaking hot reloading experience
+        new webpack.NoErrorsPlugin(), // Keep errors for blaking hot reloading experience
+        new Dotenv({
+          path: './.env', // Path to .env file (this is the default)
+          safe: false // load .env (defaults to "false" which does not use dotenv-safe)
+        })
     ],
     module: {
       noParse: /node_modules\/provotum-stomp-client\/lib\/sock-js\/sockjs.js/,
