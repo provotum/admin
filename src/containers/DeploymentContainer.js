@@ -64,7 +64,7 @@ class DeploymentContainer extends React.Component {
   componentDidMount() {
     // http://localhost:8080/sockjs-websocket
     this.stompClient = new StompClient(
-      process.env.BACKEND,
+      process.env.WEBSOCKET,
       "/sockjs-websocket",
       () => logger.log("[stompclient] disconnected")
     );
