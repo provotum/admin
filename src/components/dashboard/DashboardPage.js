@@ -15,9 +15,6 @@ class DashboardPage extends React.Component {
   render() {
     return (
       <div>
-        <Breadcrumb style={{margin: '16px 0'}}>
-          <Breadcrumb.Item>{this.props.location.pathname}</Breadcrumb.Item>
-        </Breadcrumb>
         <Row gutter={24}>
           <DeploymentContainer/>
         </Row>
